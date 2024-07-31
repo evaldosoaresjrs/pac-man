@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- jquery: -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js">
+
+    </script>
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        const gridSize = [40, 20];
+        const cellSize = 20;
+        const properties = {
+            grid: {
+                "grid-template": `repeat(${gridSize[1]}, ${cellSize}px) / repeat(${gridSize[0]}, ${cellSize}px)`
+            },
+            cell: {
+                "width": cellSize,
+                "height": cellSize,
+            }
+        }
+        const keyActions = {
+            37: [-1, 0], // seta esquerda
+            38: [0, -1], // seta cima
+            39: [1, 0], // seta direita
+            40: [0, 1], // seta baixo
+            87: [0, -1], // tecla W
+            65: [-1, 0], // tecla A
+            83: [0, 1], // tecla S
+            68: [1, 0],  // tecla D
+        };
+        $(document).ready(() => {
+            generate_board();
+            let accX = 0;
+            let accY = 0;
+            let posX;
+            let posY;
+            
+            function main_loop() {
+                let jogador = $("#player");
+                
+                jogador.css({
+                    "grid-column" : 
+                });
+
+
+                console.log(accX, accY);
+            }
+            setInterval(main_loop, 200);
+            
+            function generate_player(x, y) {
+                $(".container .cell").eq(y * gridSize[0] + x).append("<div id='player'></div>")
+                
+                $("#player").css({
+                    "width": properties.cell.width / 1.5,
+                    "height": properties.cell.height / 1.5,
+                });
+                
+            }
+            
+            function generate_board() {
+                $(".container").css(properties.grid);
+                $(".cell").css(properties.cell);
+                for (let i = 0; i < gridSize[0]; i++) {
+                    for (let j = 0; j < gridSize[1]; j++) {
+                        $(".container").append(`<div class="cell"></div>`);
+                    }
+                }
+            }
+            
+            // Botão que gera o jogador:
+            $("#btn").click(() => {
+                let x = parseInt($("#posXInput").val());
+                let y = parseInt($("#posYInput").val());
+                $(".container #player").remove();
+                generate_player(x, y);
+            });
+            
+            $(document).on('keydown', function (event) {
+                let action = keyActions[event.which];
+                if (action) {
+                    accX = action[0];
+                    accY = action[1];
+                    event.preventDefault(); // Previne o comportamento padrão das teclas
+                }
+            });
+        });
+        </script>
+</head>
+
+<body>
+    <div class="hud">
+        <input type="text" id="posXInput">
+        <input type="text" id="posYInput">
+        <button id="btn">Gerar</button>
+    </div>
+    <div class="container">
+    </div>
+</body>
+
+</html>
