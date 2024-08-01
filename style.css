@@ -8,12 +8,12 @@ body {
 
 .container {
     display: grid;
-    border: 1px solid gray;
+    border: 1px gray solid;
     background-color: white;
 }
 
 .cell {
-    border: 1px solid gray;
+    /* border: 1px solid gray; */
     background-color: white;
     display: flex;
     align-items: center;
@@ -31,4 +31,8 @@ body {
     top: 0;
     left: 0;
     padding: 5px;
+}
+
+.cor {
+    background-color: blue;
 }
