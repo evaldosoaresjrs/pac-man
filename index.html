@@ -43,16 +43,18 @@
             function main_loop() {
                 let jogador = $("#player");
                 
-                jogador.css({
-                    "grid-column" : 
-                });
+                posX += accX;
+                posY += accY;
+                
+                // Movimento do personagem
+                generate_player(posX, posY)
 
 
-                console.log(accX, accY);
+                console.log(posX, posY);
             }
-            setInterval(main_loop, 200);
-            
+
             function generate_player(x, y) {
+                $("#player").remove()
                 $(".container .cell").eq(y * gridSize[0] + x).append("<div id='player'></div>")
                 
                 $("#player").css({
@@ -60,6 +62,8 @@
                     "height": properties.cell.height / 1.5,
                 });
                 
+                posX = x;
+                posY = y;
             }
             
             function generate_board() {
@@ -79,6 +83,10 @@
                 $(".container #player").remove();
                 generate_player(x, y);
             });
+
+            $("#startLoop").click(() => {
+                setInterval(main_loop, 200);
+            })
             
             $(document).on('keydown', function (event) {
                 let action = keyActions[event.which];
@@ -97,6 +105,7 @@
         <input type="text" id="posXInput">
         <input type="text" id="posYInput">
         <button id="btn">Gerar</button>
+        <button id="startLoop">Start loop</button>
     </div>
     <div class="container">
     </div>
