@@ -1,5 +1,5 @@
-const gridSize = [20, 10];
-const cellSize = 30;
+const gridSize = [40, 20];
+const cellSize = 20;
 const properties = {
     grid: {
         "grid-template": `repeat(${gridSize[1]}, ${cellSize}px) / repeat(${gridSize[0]}, ${cellSize}px)`
@@ -23,9 +23,10 @@ const keyActions = {
 
 const gameTickSpeed = 100;
 let gameGrid = [];
+let mapLoaded = false;
 
 $(document).ready(() => {
-    generate_board();
+    // generate_board();
     let accX = 0;
     let accY = 0;
     let posX;
@@ -36,8 +37,6 @@ $(document).ready(() => {
     console.log(mainLoop)
 
     function main_loop() {
-
-        gameGrid[posY][posX] = 0;
 
         if (!$(".container .cell").eq((posY + accY) * gridSize[0] + (posX + accX)).hasClass("cor")) {
             posX += accX; // Aceleração Horizontal
@@ -51,7 +50,7 @@ $(document).ready(() => {
         else if (posY < 0) posY = gridSize[1] - 1;
 
         // Atualiza o grid com a posição do personagem
-        gameGrid[posY][posX] = 1;
+        // gameGrid[posY][posX] = 1;
 
         // Movimento do personagem
         generate_player(posX, posY)
@@ -74,14 +73,23 @@ $(document).ready(() => {
     }
 
     function generate_board() {
+        $(".cell").remove();
         $(".container").css(properties.grid);
         $(".cell").css(properties.cell);
         for (let i = 0; i < gridSize[1]; i++) { // Vertical
-            gameGrid.push([])
+            if (!mapLoaded) gameGrid.push([])
             for (let j = 0; j < gridSize[0]; j++) { // Horizontal
-                gameGrid[i].push(0);
+                if (!mapLoaded) {
+                    gameGrid[i].push(0)
+                    $(".container").append(`<div class="cell"></div>`);
+                } 
+                else {
+                    if (gameGrid[i][j] == 1) {
+                        $(".container").append(`<div class="cell cor"></div>`);
+                    } else $(".container").append(`<div class="cell"></div>`)
+                }
                 // if (gridSize[0] * Math.random() < gridSize[0]/2) $(".container").append(`<div class="cell cor"></div>`);
-                $(".container").append(`<div class="cell"></div>`);
+
             }
         }
     }
@@ -97,8 +105,33 @@ $(document).ready(() => {
         });
     }
 
-    function get_cell_index() {
+    function get_cell_index(cellObj) {
+        let rawPos = $(cellObj).index();
 
+        let mouseX = rawPos % gridSize[0];
+        let mouseY = Math.floor(rawPos / gridSize[0]);
+
+        return [mouseX, mouseY]
+    }
+
+    function set_gameGrid_cell(cell, value = 1) {
+        let positions = get_cell_index(cell);
+
+        gameGrid[positions[1]][positions[0]] = value;
+    }
+
+    function readFile(event) {
+        return new Promise((resolve, reject) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            } else {
+                reject(new Error('No file selected.'));
+            }
+        });
     }
 
     // Botão que gera o jogador:
@@ -106,7 +139,8 @@ $(document).ready(() => {
         // let x = parseInt($("#posXInput").val());
         // let y = parseInt($("#posYInput").val());
         $(".container #player").remove();
-        generate_player(0, 0);
+        // generate_player(0, 0);
+        generate_board();
     });
 
     $("#startLoop").click(() => {
@@ -125,7 +159,7 @@ $(document).ready(() => {
 
         const texto = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
 
-        const blob = new Blob([texto], {type : 'text/plain;charset=utf-8' });
+        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
 
         const a = $('<a></a>');
@@ -142,25 +176,39 @@ $(document).ready(() => {
 
     });
 
+    $("#fileInput").on("change", async (event) => {
+        try {
+            const content = await readFile(event);
+            gameGrid = JSON.parse(content);
+            mapLoaded = true;
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
     $('.cell').hover(function (event) {
-
-        let rawPos = $(this).index();
-
-        let mouseX = rawPos % gridSize[0];
-        let mouseY = Math.floor(rawPos / gridSize[0]);
-
-        console.log(mouseX, mouseY);
-
         eraser = $("#eraser").is(":checked");
         detect_click();
-        if (isMouseDown && !eraser) $(this).addClass('cor');
-        else if (isMouseDown) $(this).removeClass('cor');
+        if (isMouseDown && !eraser) {
+            $(this).addClass('cor');
+            set_gameGrid_cell($(this));
+        }
+        else if (isMouseDown) {
+            $(this).removeClass('cor');
+            set_gameGrid_cell($(this), 0);
+        };
     });
 
     $(".cell").click(function () {
         eraser = $("#eraser").is(":checked");
-        if (!eraser) $(this).addClass('cor');
-        else $(this).removeClass('cor');
+        if (!eraser) { 
+            $(this).addClass('cor')
+            set_gameGrid_cell($(this));
+         }
+        else {
+            $(this).removeClass('cor')
+            set_gameGrid_cell($(this), 0);
+        };
     })
 
     $(document).on('keydown', function (event) {
