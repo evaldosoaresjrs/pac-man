@@ -1,12 +1,12 @@
-const gridSize = [40, 20];
 const cellSize = 20;
-const properties = {
-    grid: {
-        "grid-template": `repeat(${gridSize[1]}, ${cellSize}px) / repeat(${gridSize[0]}, ${cellSize}px)`
-    },
+const propertiesCss = {
     cell: {
         "width": cellSize,
         "height": cellSize,
+    },
+    player: {
+        "width": cellSize / 1.5,
+        "height": cellSize / 1.5
     }
 }
 
@@ -21,75 +21,63 @@ const keyActions = {
     68: [1, 0],  // tecla D
 };
 
-const gameTickSpeed = 100;
-let gameGrid = [];
+const gameTickSpeed = 100; // Em ms
 let mapLoaded = false;
+let gameGrid;
 
 $(document).ready(() => {
-    // generate_board();
     let accX = 0;
     let accY = 0;
-    let posX;
-    let posY;
-    let mainLoop = false; // Define se o jogo esta funcionando ou não
+    let playerPosX;
+    let playerPosY;
+    let mainLoop; // Defino se o loop está ativo
     let isMouseDown;
-
-    console.log(mainLoop)
+    const gridSize = [gridSizeX.value, gridSizeY.value]; // [colunas, linhas] [x, y]
 
     function main_loop() {
-
-        if (!$(".container .cell").eq((posY + accY) * gridSize[0] + (posX + accX)).hasClass("cor")) {
-            posX += accX; // Aceleração Horizontal
-            posY += accY; // Aceleração Vertical
+        if (!$(".container .cell").eq((playerPosY + accY) * gridSize[0] + (playerPosX + accX)).hasClass("cor")) {
+            playerPosX += accX; // Aceleração Horizontal
+            playerPosY += accY; // Aceleração Vertical
         }
 
         // Faz o personagem "teleportar" ao chegar na borda
-        if (posX == gridSize[0]) posX = 0;
-        else if (posX < 0) posX = gridSize[0] - 1;
-        if (posY == gridSize[1]) posY = 0;
-        else if (posY < 0) posY = gridSize[1] - 1;
-
-        // Atualiza o grid com a posição do personagem
-        // gameGrid[posY][posX] = 1;
+        if (playerPosX == gridSize[0]) playerPosX = 0;
+        else if (playerPosX < 0) playerPosX = gridSize[0] - 1;
+        if (playerPosY == gridSize[1]) playerPosY = 0;
+        else if (playerPosY < 0) playerPosY = gridSize[1] - 1;
 
         // Movimento do personagem
-        generate_player(posX, posY)
-
-        // console.clear();
-        console.log(gameGrid.join(" "));
+        generate_player(playerPosX, playerPosY)
     }
 
-    function generate_player(x, y) {
+    function generate_player(x = 1, y = 1) {
         $("#player").remove()
         $(".container .cell").eq(y * gridSize[0] + x).append("<div id='player'></div>")
 
-        $("#player").css({
-            "width": properties.cell.width / 1.5,
-            "height": properties.cell.height / 1.5,
-        });
+        $("#player").css(propertiesCss.player);
 
-        posX = x;
-        posY = y;
+        playerPosX = x;
+        playerPosY = y;
     }
 
-    function generate_board() {
+    function generate_board(sizeX = gridSize[0], sizeY = gridSize[1], cell = cellSize, map = []) {
+        let containerCss = {"grid-template": `repeat(${sizeY}, ${cell}px) / repeat(${sizeX}, ${cell}px)`}
+        $(".container").css(containerCss);
+        $(".cell").css(propertiesCss.cell);
         $(".cell").remove();
-        $(".container").css(properties.grid);
-        $(".cell").css(properties.cell);
-        for (let i = 0; i < gridSize[1]; i++) { // Vertical
+        gameGrid = map;
+        for (let i = 0; i < sizeY; i++) { // Vertical Y
             if (!mapLoaded) gameGrid.push([])
-            for (let j = 0; j < gridSize[0]; j++) { // Horizontal
+            for (let j = 0; j < sizeX; j++) { // Horizontal X
                 if (!mapLoaded) {
-                    gameGrid[i].push(0)
+                    gameGrid[i].push(map[i][j])
                     $(".container").append(`<div class="cell"></div>`);
                 } 
                 else {
-                    if (gameGrid[i][j] == 1) {
+                    if (map[i][j] == 1) {
                         $(".container").append(`<div class="cell cor"></div>`);
                     } else $(".container").append(`<div class="cell"></div>`)
                 }
-                // if (gridSize[0] * Math.random() < gridSize[0]/2) $(".container").append(`<div class="cell cor"></div>`);
-
             }
         }
     }
@@ -134,14 +122,42 @@ $(document).ready(() => {
         });
     }
 
-    // Botão que gera o jogador:
-    $("#btn").click(() => {
-        // let x = parseInt($("#posXInput").val());
-        // let y = parseInt($("#posYInput").val());
-        $(".container #player").remove();
-        // generate_player(0, 0);
-        generate_board();
+    function start_click_handler() {
+        $('.cell').on("mousemove", function (event) {
+            eraser = $("#eraser").is(":checked");
+            detect_click();
+            if (isMouseDown && !eraser) {
+                $(this).addClass('cor');
+                set_gameGrid_cell($(this));
+            }
+            else if (isMouseDown) {
+                $(this).removeClass('cor');
+                set_gameGrid_cell($(this), 0);
+            };
+        });
+    
+        $(".cell").click(function () {
+            eraser = $("#eraser").is(":checked");
+            if (!eraser) { 
+                $(this).addClass('cor')
+                set_gameGrid_cell($(this));
+             }
+            else {
+                $(this).removeClass('cor')
+                set_gameGrid_cell($(this), 0);
+            };
+        })
+    }
+
+    $("#btnMapa").click(() => {
+        generate_board(gridSizeX.value, gridSizeY.value);
+        start_click_handler();
     });
+
+    $("#btnPlayer").click(() => {
+        $(".container #player").remove();
+        generate_player(1, 1);
+    })
 
     $("#startLoop").click(() => {
         mainLoop = setInterval(main_loop, gameTickSpeed);
@@ -153,13 +169,20 @@ $(document).ready(() => {
 
     $("#resetColor").click(() => {
         $(".cor").removeClass("cor");
+        for (let i = 0; i < gameGrid.length; i++) {
+            for (let j = 0; i < gameGrid[i].length; j++) {
+                gameGrid[i][j] = 0;
+            }
+        }
     })
 
     $("#saveGrid").click(() => {
 
-        const texto = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
+        const map = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
 
-        const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+        const text = `{"gridSize" : [${gridSize}],\n "cellSize" : ${cellSize},\n "map" : ${map}}`
+
+        const blob = new Blob([text], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
         const a = $('<a></a>');
@@ -178,38 +201,14 @@ $(document).ready(() => {
 
     $("#fileInput").on("change", async (event) => {
         try {
-            const content = await readFile(event);
-            gameGrid = JSON.parse(content);
+            const fileContent = await readFile(event);
+            let mapProperties = JSON.parse(fileContent);
             mapLoaded = true;
+            generate_board(mapProperties.gridSize[0], mapProperties.gridSize[1], mapProperties.cellSize, mapProperties.map);
         } catch (error) {
             console.error(error);
         }
     });
-
-    $('.cell').hover(function (event) {
-        eraser = $("#eraser").is(":checked");
-        detect_click();
-        if (isMouseDown && !eraser) {
-            $(this).addClass('cor');
-            set_gameGrid_cell($(this));
-        }
-        else if (isMouseDown) {
-            $(this).removeClass('cor');
-            set_gameGrid_cell($(this), 0);
-        };
-    });
-
-    $(".cell").click(function () {
-        eraser = $("#eraser").is(":checked");
-        if (!eraser) { 
-            $(this).addClass('cor')
-            set_gameGrid_cell($(this));
-         }
-        else {
-            $(this).removeClass('cor')
-            set_gameGrid_cell($(this), 0);
-        };
-    })
 
     $(document).on('keydown', function (event) {
         let action = keyActions[event.which];
