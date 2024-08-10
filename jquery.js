@@ -1,3 +1,4 @@
+let gridSize = [gridSizeX, gridSizeY]
 const cellSize = 20;
 const propertiesCss = {
     cell: {
@@ -32,7 +33,6 @@ $(document).ready(() => {
     let playerPosY;
     let mainLoop; // Defino se o loop está ativo
     let isMouseDown;
-    const gridSize = [gridSizeX.value, gridSizeY.value]; // [colunas, linhas] [x, y]
 
     function main_loop() {
         if (!$(".container .cell").eq((playerPosY + accY) * gridSize[0] + (playerPosX + accX)).hasClass("cor")) {
@@ -62,6 +62,10 @@ $(document).ready(() => {
 
     function generate_board(sizeX = gridSize[0], sizeY = gridSize[1], cell = cellSize, map = []) {
         let containerCss = {"grid-template": `repeat(${sizeY}, ${cell}px) / repeat(${sizeX}, ${cell}px)`}
+        
+        gridSizeX.value = sizeX
+        gridSizeY.value = sizeY
+
         $(".container").css(containerCss);
         $(".cell").css(propertiesCss.cell);
         $(".cell").remove();
@@ -70,7 +74,7 @@ $(document).ready(() => {
             if (!mapLoaded) gameGrid.push([])
             for (let j = 0; j < sizeX; j++) { // Horizontal X
                 if (!mapLoaded) {
-                    gameGrid[i].push(map[i][j])
+                    gameGrid[i].push(0)
                     $(".container").append(`<div class="cell"></div>`);
                 } 
                 else {
@@ -103,6 +107,7 @@ $(document).ready(() => {
     }
 
     function set_gameGrid_cell(cell, value = 1) {
+        gridSize = [gridSizeX.value, gridSizeY.value]
         let positions = get_cell_index(cell);
 
         gameGrid[positions[1]][positions[0]] = value;
@@ -179,6 +184,8 @@ $(document).ready(() => {
     $("#saveGrid").click(() => {
 
         const map = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
+
+        gridSize = [gridSizeX.value, gridSizeY.value]
 
         const text = `{"gridSize" : [${gridSize}],\n "cellSize" : ${cellSize},\n "map" : ${map}}`
 
