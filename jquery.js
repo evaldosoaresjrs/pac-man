@@ -1,4 +1,4 @@
-let gridSize = [gridSizeX, gridSizeY]
+let gridSize = [gridSizeX.value, gridSizeY.value]
 const cellSize = 20;
 const propertiesCss = {
     cell: {
@@ -60,15 +60,18 @@ $(document).ready(() => {
         playerPosY = y;
     }
 
-    function generate_board(sizeX = gridSize[0], sizeY = gridSize[1], cell = cellSize, map = []) {
+    function generate_board(sizeX, sizeY, cell = cellSize, map = []) {
         let containerCss = {"grid-template": `repeat(${sizeY}, ${cell}px) / repeat(${sizeX}, ${cell}px)`}
+        
+        gridSize = [sizeX, sizeY];
         
         gridSizeX.value = sizeX
         gridSizeY.value = sizeY
-
+        
         $(".container").css(containerCss);
         $(".cell").css(propertiesCss.cell);
         $(".cell").remove();
+    
         gameGrid = map;
         for (let i = 0; i < sizeY; i++) { // Vertical Y
             if (!mapLoaded) gameGrid.push([])
@@ -84,6 +87,7 @@ $(document).ready(() => {
                 }
             }
         }
+        start_click_handler();
     }
 
     function detect_click() {
@@ -107,7 +111,6 @@ $(document).ready(() => {
     }
 
     function set_gameGrid_cell(cell, value = 1) {
-        gridSize = [gridSizeX.value, gridSizeY.value]
         let positions = get_cell_index(cell);
 
         gameGrid[positions[1]][positions[0]] = value;
@@ -156,7 +159,6 @@ $(document).ready(() => {
 
     $("#btnMapa").click(() => {
         generate_board(gridSizeX.value, gridSizeY.value);
-        start_click_handler();
     });
 
     $("#btnPlayer").click(() => {
@@ -175,7 +177,7 @@ $(document).ready(() => {
     $("#resetColor").click(() => {
         $(".cor").removeClass("cor");
         for (let i = 0; i < gameGrid.length; i++) {
-            for (let j = 0; i < gameGrid[i].length; j++) {
+            for (let j = 0; j < gameGrid[i].length; j++) {
                 gameGrid[i][j] = 0;
             }
         }
@@ -184,8 +186,6 @@ $(document).ready(() => {
     $("#saveGrid").click(() => {
 
         const map = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
-
-        gridSize = [gridSizeX.value, gridSizeY.value]
 
         const text = `{"gridSize" : [${gridSize}],\n "cellSize" : ${cellSize},\n "map" : ${map}}`
 
