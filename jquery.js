@@ -1,3 +1,5 @@
+import mapGen from "./mapGeneration.js"
+
 let gridSize = [gridSizeX.value, gridSizeY.value]
 const cellSize = 20;
 const propertiesCss = {
@@ -160,6 +162,10 @@ $(document).ready(() => {
     $("#btnMapa").click(() => {
         generate_board(gridSizeX.value, gridSizeY.value);
     });
+
+    $("#btnRandomMap").click(() => {
+        console.log(mapGen.generateMap(gridSizeY.value, gridSizeX.value));
+    })
 
     $("#btnPlayer").click(() => {
         $(".container #player").remove();
