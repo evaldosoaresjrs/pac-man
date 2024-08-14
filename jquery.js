@@ -35,6 +35,7 @@ $(document).ready(() => {
     let playerPosY;
     let mainLoop; // Defino se o loop está ativo
     let isMouseDown;
+    let eraser;
 
     function main_loop() {
         if (!$(".container .cell").eq((playerPosY + accY) * gridSize[0] + (playerPosX + accX)).hasClass("cor")) {
@@ -75,6 +76,7 @@ $(document).ready(() => {
         $(".cell").remove();
     
         gameGrid = map;
+        console.log(map);
         for (let i = 0; i < sizeY; i++) { // Vertical Y
             if (!mapLoaded) gameGrid.push([])
             for (let j = 0; j < sizeX; j++) { // Horizontal X
@@ -116,6 +118,10 @@ $(document).ready(() => {
         let positions = get_cell_index(cell);
 
         gameGrid[positions[1]][positions[0]] = value;
+    }
+
+    function get_board_sizes() {
+        return [gridSizeX.value, gridSizeY.value]
     }
 
     function readFile(event) {
@@ -164,7 +170,9 @@ $(document).ready(() => {
     });
 
     $("#btnRandomMap").click(() => {
-        console.log(mapGen.generateMap(gridSizeY.value, gridSizeX.value));
+        gridSize = get_board_sizes();
+        mapLoaded = true;
+        generate_board(gridSize[0], gridSize[1], cellSize, mapGen.generateMap(gridSize[1], gridSize[0]))
     })
 
     $("#btnPlayer").click(() => {
