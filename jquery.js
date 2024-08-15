@@ -24,14 +24,14 @@ const keyActions = {
 
 const gameTickSpeed = 200; // Em ms
 let mapLoaded = false;
-let gameGrid;
+let gameGrid = [];
 
 $(() => {
     let accX = 0;
     let accY = 0;
     let playerPosX;
     let playerPosY;
-    let mainLoop; // Defino se o loop está ativo
+    let mainLoop = undefined; // Defino se o loop está ativo
     let isMouseDown;
     let eraser;
 
@@ -88,7 +88,7 @@ $(() => {
         gameGrid = map;
         console.log(map);
         for (let i = 0; i < sizeY; i++) { // Vertical Y
-            if (!mapLoaded) gameGrid.push([])
+            /* if (!mapLoaded) */ gameGrid.push([])
             for (let j = 0; j < sizeX; j++) { // Horizontal X
                 if (!mapLoaded) {
                     gameGrid[i].push(0)
@@ -175,6 +175,16 @@ $(() => {
         })
     }
 
+    function startLoop(){
+        if (!mainLoop && $("#player").length)
+            mainLoop = setInterval(main_loop, gameTickSpeed);
+    }
+
+    function stopLoop(){
+        clearInterval(mainLoop);
+        mainLoop = undefined
+    }
+
     $("#btnMapa").on('click', () => {
         generate_board(gridSizeX.value, gridSizeY.value);
     });
@@ -190,13 +200,9 @@ $(() => {
         generate_player(1, 1);
     })
 
-    $("#startLoop").click(() => {
-        mainLoop = setInterval(main_loop, gameTickSpeed);
-    })
+    $("#start-loop").on('click', startLoop)
 
-    $("#stopLoop").click(() => {
-        clearInterval(mainLoop);
-    });
+    $("#stop-loop").on('click', stopLoop);
 
     $("#resetColor").on('click', () => {
         $(".cor").removeClass("cor");
