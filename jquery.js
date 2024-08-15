@@ -34,19 +34,38 @@ $(() => {
     let mainLoop = undefined; // Defino se o loop está ativo
     let isMouseDown;
     let eraser;
+    let keyBuffer = []
 
     function main_loop() {
         $(".container .cell").index();
-
-        let isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + dirY) * gridSize[0] + (playerPosX + dirX)).hasClass("cor")
+        
+        let dirX = accX
+        let dirY = accY
+        
+        let isNextSquareOnTapeOccupied
+        
+        if (keyBuffer.length > 0) {
+            isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + keyBuffer[1]) * gridSize[0] + (playerPosX + keyBuffer[0])).hasClass("cor")
+            
+            if(!isNextSquareOnTapeOccupied){
+                dirX = keyBuffer[0]
+                dirY = keyBuffer[1]
+                keyBuffer = []
+            }
+        }
+        
+        isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + dirY) * gridSize[0] + (playerPosX + dirX)).hasClass("cor")
         
         // Mudar para gameGrid
         if ((dirX == 1 && isNextSquareOnTapeOccupied && playerPosX == (gridSize[0]-1)) ||
             (dirX == -1 && isNextSquareOnTapeOccupied && playerPosX == 0) ||
             !isNextSquareOnTapeOccupied
         ){
-            playerPosX += accX; // Aceleração Horizontal
-            playerPosY += accY; // Aceleração Vertical
+            playerPosX += dirX; // Aceleração Horizontal
+            playerPosY += dirY; // Aceleração Vertical
+
+            accX = dirX
+            accY = dirY
         }
 
         // Faz o personagem "teleportar" ao chegar na borda
@@ -262,8 +281,17 @@ $(() => {
     $(document).on('keydown', function (event) {
         let action = keyActions[event.which];
         if (action) {
-            accX = action[0];
-            accY = action[1];
+            let isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + action[1]) * gridSize[0] + (playerPosX + action[0])).hasClass("cor")
+
+            if (!isNextSquareOnTapeOccupied){
+                accX = action[0];
+                accY = action[1];
+                keyBuffer = []
+            }
+            else{
+                keyBuffer = [...action]
+            }
+            
             event.preventDefault(); // Previne o comportamento padrão das teclas
         }
     });
