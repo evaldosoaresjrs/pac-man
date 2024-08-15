@@ -221,7 +221,24 @@ $(() => {
 
     $("#btnPlayer").on('click', () => {
         $(".container #player").remove();
-        generate_player(1, 1);
+
+        let x = 1
+        let y = 1
+
+        let tries = 0
+
+        let limit = $(".container .cell").length * 100
+
+        do{
+            x = Math.floor(Math.random() * (gridSize[0]-2)) + 1
+            y = Math.floor(Math.random() * (gridSize[1]-2)) + 1
+
+            tries++;
+        }while($(".container .cell").eq(y * gridSize[0] + x).hasClass("cor") && tries < limit)
+
+        if (tries < limit){
+            generate_player(x, y);
+        }
     })
 
     $("#start-loop").on('click', startLoop)
