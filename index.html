@@ -23,6 +23,11 @@
         <input type="checkbox" name="" id="eraser"> Borracha
         <input type="checkbox" name="" id="symmetrical"> Simetria <br><br>
 
+        <span>velocidade</span><br>
+        <input type="range" value="60" id="speed" min="10" max="100" oninput="this.nextElementSibling.value = this.value">
+        <output>60</output>
+        <br><br>
+        
         <button id="saveGrid">Salvar Mapa</button>
         Map Upload:
         <input type="file" id="fileInput">

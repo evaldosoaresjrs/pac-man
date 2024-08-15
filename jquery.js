@@ -22,7 +22,7 @@ const keyActions = {
     68: [1, 0],  // tecla D
 };
 
-const gameTickSpeed = 200; // Em ms
+let gameTickSpeed = 200; // Em ms
 let mapLoaded = false;
 let gameGrid = [];
 
@@ -211,6 +211,13 @@ $(() => {
                 gameGrid[i][j] = 0;
             }
         }
+    })
+
+    $("#speed").on('change', (event) => {
+        gameTickSpeed = 500 - (parseInt(event.target.value)*5)
+
+        stopLoop()
+        startLoop()
     })
 
     $("#saveGrid").on('click', () => {
