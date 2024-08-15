@@ -571,6 +571,14 @@ function generateMap(h = 10, w = 20, symmetrical = true){
 
         l[i+2][j+7] = l[i+1][j+7] = l[i+3][j+7] = 1
     }
+
+    for(let i = 1; i < l.length-1; i++){
+        for (let j = 1; j < l[0].length-1; j++){
+            if ((l[i-1][j-1] + l[i-1][j+1] + l[i+1][j-1] + l[i+1][j+1]) == 0){
+                l[i][j] = 1
+            }
+        }
+    }
     
     // ghosts house "door"
     if(Math.floor(Math.random() * 2)){
