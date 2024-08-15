@@ -38,8 +38,13 @@ $(() => {
     function main_loop() {
         $(".container .cell").index();
 
+        let isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + dirY) * gridSize[0] + (playerPosX + dirX)).hasClass("cor")
+        
         // Mudar para gameGrid
-        if (!$(".container .cell").eq((playerPosY + accY) * gridSize[0] + (playerPosX + accX)).hasClass("cor")) {
+        if ((dirX == 1 && isNextSquareOnTapeOccupied && playerPosX == (gridSize[0]-1)) ||
+            (dirX == -1 && isNextSquareOnTapeOccupied && playerPosX == 0) ||
+            !isNextSquareOnTapeOccupied
+        ){
             playerPosX += accX; // Aceleração Horizontal
             playerPosY += accY; // Aceleração Vertical
         }
