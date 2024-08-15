@@ -26,7 +26,7 @@ const gameTickSpeed = 200; // Em ms
 let mapLoaded = false;
 let gameGrid;
 
-$(document).ready(() => {
+$(() => {
     let accX = 0;
     let accY = 0;
     let playerPosX;
@@ -106,11 +106,11 @@ $(document).ready(() => {
 
     function detect_click() {
         // Detecta quando o mouse é clicado
-        $(".cell").mousedown(function () {
+        $(".cell").on("mousedown", function () {
             isMouseDown = true;
         });
         // Detecta quando o botão do mouse é solto
-        $(".cell").mouseup(function () {
+        $(".cell").on("mouseup", function () {
             isMouseDown = false;
         });
     }
@@ -162,7 +162,7 @@ $(document).ready(() => {
             };
         });
     
-        $(".cell").click(function () {
+        $(".cell").on('click', function () {
             eraser = $("#eraser").is(":checked");
             if (!eraser) { 
                 $(this).addClass('cor')
@@ -175,17 +175,17 @@ $(document).ready(() => {
         })
     }
 
-    $("#btnMapa").click(() => {
+    $("#btnMapa").on('click', () => {
         generate_board(gridSizeX.value, gridSizeY.value);
     });
 
-    $("#btnRandomMap").click(() => {
+    $("#btnRandomMap").on('click', () => {
         gridSize = get_board_sizes();
         mapLoaded = true;
         generate_board(gridSize[0], gridSize[1], cellSize, generateMap(gridSize[1], gridSize[0], symmetrical.checked))
     })
 
-    $("#btnPlayer").click(() => {
+    $("#btnPlayer").on('click', () => {
         $(".container #player").remove();
         generate_player(1, 1);
     })
@@ -198,7 +198,7 @@ $(document).ready(() => {
         clearInterval(mainLoop);
     });
 
-    $("#resetColor").click(() => {
+    $("#resetColor").on('click', () => {
         $(".cor").removeClass("cor");
         for (let i = 0; i < gameGrid.length; i++) {
             for (let j = 0; j < gameGrid[i].length; j++) {
@@ -207,7 +207,7 @@ $(document).ready(() => {
         }
     })
 
-    $("#saveGrid").click(() => {
+    $("#saveGrid").on('click', () => {
 
         const map = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
 
@@ -221,7 +221,7 @@ $(document).ready(() => {
         a.attr('download', `matrix_map-${gridSize[0]}x${gridSize[1]}`);
 
         $('body').append(a);
-        a[0].click();
+        a[0].on('click', );
 
         a.remove();
 
