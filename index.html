@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="hud">
-        <input type="number" id="gridSizeX" value = "10">
+        <input type="number" id="gridSizeX" value = "20">
         <input type="number" id="gridSizeY" value = "10">
         <button id="btnMapa">Gerar Mapa</button>
         <button id="btnRandomMap">Gerar Mapa Aleatório</button>
@@ -20,7 +20,8 @@
         <button id="startLoop">Start loop</button>
         <button id="stopLoop">Stop loop</button>
         <button id="resetColor">Reset</button>
-        <input type="checkbox" name="" id="eraser">Eraser <br><br>
+        <input type="checkbox" name="" id="eraser"> Borracha
+        <input type="checkbox" name="" id="symmetrical"> Simetria <br><br>
 
         <button id="saveGrid">Salvar Mapa</button>
         Map Upload:
@@ -28,8 +29,7 @@
     </div>
     <div class="container">
     </div>
-    <script type="module" src="mapGeneration.js"></script>
-    <script type="module" src="jquery.js"></script>
+    <script src="jquery.js"></script>
 </body>
 
 </html>
