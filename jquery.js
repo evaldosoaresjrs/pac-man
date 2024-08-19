@@ -22,26 +22,50 @@ const keyActions = {
     68: [1, 0],  // tecla D
 };
 
-const gameTickSpeed = 200; // Em ms
+let gameTickSpeed = 200; // Em ms
 let mapLoaded = false;
-let gameGrid;
+let gameGrid = [];
 
-$(document).ready(() => {
+$(() => {
     let accX = 0;
     let accY = 0;
     let playerPosX;
     let playerPosY;
-    let mainLoop; // Defino se o loop está ativo
+    let mainLoop = undefined; // Defino se o loop está ativo
     let isMouseDown;
     let eraser;
+    let keyBuffer = []
 
     function main_loop() {
         $(".container .cell").index();
-
+        
+        let dirX = accX
+        let dirY = accY
+        
+        let isNextSquareOnTapeOccupied
+        
+        if (keyBuffer.length > 0) {
+            isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + keyBuffer[1]) * gridSize[0] + (playerPosX + keyBuffer[0])).hasClass("cor")
+            
+            if(!isNextSquareOnTapeOccupied){
+                dirX = keyBuffer[0]
+                dirY = keyBuffer[1]
+                keyBuffer = []
+            }
+        }
+        
+        isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + dirY) * gridSize[0] + (playerPosX + dirX)).hasClass("cor")
+        
         // Mudar para gameGrid
-        if (!$(".container .cell").eq((playerPosY + accY) * gridSize[0] + (playerPosX + accX)).hasClass("cor")) {
-            playerPosX += accX; // Aceleração Horizontal
-            playerPosY += accY; // Aceleração Vertical
+        if ((dirX == 1 && isNextSquareOnTapeOccupied && playerPosX == (gridSize[0]-1)) ||
+            (dirX == -1 && isNextSquareOnTapeOccupied && playerPosX == 0) ||
+            !isNextSquareOnTapeOccupied
+        ){
+            playerPosX += dirX; // Aceleração Horizontal
+            playerPosY += dirY; // Aceleração Vertical
+
+            accX = dirX
+            accY = dirY
         }
 
         // Faz o personagem "teleportar" ao chegar na borda
@@ -88,7 +112,7 @@ $(document).ready(() => {
         gameGrid = map;
         console.log(map);
         for (let i = 0; i < sizeY; i++) { // Vertical Y
-            if (!mapLoaded) gameGrid.push([])
+            /* if (!mapLoaded) */ gameGrid.push([])
             for (let j = 0; j < sizeX; j++) { // Horizontal X
                 if (!mapLoaded) {
                     gameGrid[i].push(0)
@@ -106,11 +130,11 @@ $(document).ready(() => {
 
     function detect_click() {
         // Detecta quando o mouse é clicado
-        $(".cell").mousedown(function () {
+        $(".cell").on("mousedown", function () {
             isMouseDown = true;
         });
         // Detecta quando o botão do mouse é solto
-        $(".cell").mouseup(function () {
+        $(".cell").on("mouseup", function () {
             isMouseDown = false;
         });
     }
@@ -162,7 +186,7 @@ $(document).ready(() => {
             };
         });
     
-        $(".cell").click(function () {
+        $(".cell").on('click', function () {
             eraser = $("#eraser").is(":checked");
             if (!eraser) { 
                 $(this).addClass('cor')
@@ -175,30 +199,53 @@ $(document).ready(() => {
         })
     }
 
-    $("#btnMapa").click(() => {
+    function startLoop(){
+        if (!mainLoop && $("#player").length)
+            mainLoop = setInterval(main_loop, gameTickSpeed);
+    }
+
+    function stopLoop(){
+        clearInterval(mainLoop);
+        mainLoop = undefined
+    }
+
+    $("#btnMapa").on('click', () => {
         generate_board(gridSizeX.value, gridSizeY.value);
     });
 
-    $("#btnRandomMap").click(() => {
+    $("#btnRandomMap").on('click', () => {
         gridSize = get_board_sizes();
         mapLoaded = true;
         generate_board(gridSize[0], gridSize[1], cellSize, generateMap(gridSize[1], gridSize[0], symmetrical.checked))
     })
 
-    $("#btnPlayer").click(() => {
+    $("#btnPlayer").on('click', () => {
         $(".container #player").remove();
-        generate_player(1, 1);
+
+        let x = 1
+        let y = 1
+
+        let tries = 0
+
+        let limit = $(".container .cell").length * 100
+
+        do{
+            x = Math.floor(Math.random() * (gridSize[0]-2)) + 1
+            y = Math.floor(Math.random() * (gridSize[1]-2)) + 1
+
+            tries++;
+        }while($(".container .cell").eq(y * gridSize[0] + x).hasClass("cor") && tries < limit)
+
+        if (tries < limit){
+            generate_player(x, y);
+        }
     })
 
-    $("#startLoop").click(() => {
-        mainLoop = setInterval(main_loop, gameTickSpeed);
-    })
+    $("#start-loop").on('click', startLoop)
 
-    $("#stopLoop").click(() => {
-        clearInterval(mainLoop);
-    });
+    $("#stop-loop").on('click', stopLoop);
 
-    $("#resetColor").click(() => {
+    $("#resetColor").on('click', () => {
         $(".cor").removeClass("cor");
         for (let i = 0; i < gameGrid.length; i++) {
             for (let j = 0; j < gameGrid[i].length; j++) {
@@ -207,7 +254,14 @@ $(document).ready(() => {
         }
     })
 
-    $("#saveGrid").click(() => {
+    $("#speed").on('change', (event) => {
+        gameTickSpeed = 500 - (parseInt(event.target.value)*5)
+
+        stopLoop()
+        startLoop()
+    })
+
+    $("#saveGrid").on('click', () => {
 
         const map = "[[" + gameGrid.map(linha => linha.join(", ")).join("],\n[") + "]]";
 
@@ -221,7 +275,7 @@ $(document).ready(() => {
         a.attr('download', `matrix_map-${gridSize[0]}x${gridSize[1]}`);
 
         $('body').append(a);
-        a[0].click();
+        a[0].on('click', );
 
         a.remove();
 
@@ -244,8 +298,17 @@ $(document).ready(() => {
     $(document).on('keydown', function (event) {
         let action = keyActions[event.which];
         if (action) {
-            accX = action[0];
-            accY = action[1];
+            let isNextSquareOnTapeOccupied = $(".container .cell").eq((playerPosY + action[1]) * gridSize[0] + (playerPosX + action[0])).hasClass("cor")
+
+            if (!isNextSquareOnTapeOccupied){
+                accX = action[0];
+                accY = action[1];
+                keyBuffer = []
+            }
+            else{
+                keyBuffer = [...action]
+            }
+            
             event.preventDefault(); // Previne o comportamento padrão das teclas
         }
     });
@@ -564,6 +627,14 @@ function generateMap(h = 10, w = 20, symmetrical = true){
         l[i+2][j+6] = l[i][j+8] = l[i+1][j+8] = l[i+2][j+8] = l[i+3][j+8] = l[i+4][j+8] = 0
 
         l[i+2][j+7] = l[i+1][j+7] = l[i+3][j+7] = 1
+    }
+
+    for(let i = 1; i < l.length-1; i++){
+        for (let j = 1; j < l[0].length-1; j++){
+            if ((l[i-1][j-1] + l[i-1][j+1] + l[i+1][j-1] + l[i+1][j+1]) == 0){
+                l[i][j] = 1
+            }
+        }
     }
     
     // ghosts house "door"

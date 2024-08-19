@@ -17,12 +17,17 @@
         <button id="btnMapa">Gerar Mapa</button>
         <button id="btnRandomMap">Gerar Mapa Aleatório</button>
         <button id="btnPlayer">Gerar Player</button>
-        <button id="startLoop">Start loop</button>
-        <button id="stopLoop">Stop loop</button>
+        <button id="start-loop">Start loop</button>
+        <button id="stop-loop">Stop loop</button>
         <button id="resetColor">Reset</button>
         <input type="checkbox" name="" id="eraser"> Borracha
         <input type="checkbox" name="" id="symmetrical"> Simetria <br><br>
 
+        <span>velocidade</span><br>
+        <input type="range" value="60" id="speed" min="10" max="100" oninput="this.nextElementSibling.value = this.value">
+        <output>60</output>
+        <br><br>
+        
         <button id="saveGrid">Salvar Mapa</button>
         Map Upload:
         <input type="file" id="fileInput">
